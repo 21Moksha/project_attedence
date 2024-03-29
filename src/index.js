@@ -14,10 +14,6 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 
-// const static_path = path.join(__dirname, "../public");
-// const tempate_path = path.join(__dirname, "../templates/views" );
-// const partials_path = path.join(__dirname, "../templates/partials" );
-
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 //app.set("views",tempate_path);
@@ -81,10 +77,12 @@ app.post("/login",async(req,res)=>{
         }
         else
         {
-            res.send("wrong password");
+          res.send("wrong password");
         }
     }catch{
-        res.send("wrong Details")
+        //alert("wrong Details");
+        //res.alert("wrong Details");
+        res.redirect("login")
     }
 });
 
@@ -205,6 +203,24 @@ const attendance_dataSchema = new mongoose.Schema({
     }
   });
 
+// Add this route to fetch percentage based on enrollment number
+app.get('/fetchPercentage', async (req, res) => {
+  try {
+      const enrollmentNo = req.query.enrollmentNo; // Get enrollment number from query parameter
+
+      // Query the database to find the student with the given enrollment number
+      const student = await attendance_DataModel.findOne({ Enrollment: enrollmentNo });
+      if (!student) {
+          return res.status(404).json({ error: 'Student not found' });
+      }
+
+      // Return the percentage for the student
+      res.json({ percentage: student.Per });
+  } catch (error) {
+      console.error('Error fetching percentage:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
@@ -215,7 +231,13 @@ app.get("/admin_page",(req,res)=>
 app.get("/page",(req,res)=>{
     res.render("page");
 })
-
+app.get("/index",(req,res)=>
+{
+  res.render("index");
+})
+app.get("/Student_home",(req,res)=>{
+  res.render("student_home");
+})
 app.listen(5000,()=>
 {
     console.log('server is running at port 5000');
